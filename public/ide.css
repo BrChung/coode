@@ -62,6 +62,29 @@ body {
   text-align: right;
   width: fit-content;
 }
+
+.dot {
+  background: #0e6eb8;
+  position: absolute;
+  border-radius: 50px;
+  width: 5px;
+  height: 5px;
+  right: 7.5px;
+  top: 7.5px;
+}
+
+.lm_header .lm_tab {
+  padding-bottom: 3px;
+  height: 16px;
+  font-family: "Droid Sans Mono", monospace, monospace, "Droid Sans Fallback";
+  font-size: 14px;
+}
+
+.lm_header .lm_tab.lm_active {
+  box-shadow: none;
+  padding-bottom: 3px;
+}
+
 /* #site-content {
     height: calc(100% - 45px - 19px);
   } */

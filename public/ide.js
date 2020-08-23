@@ -1,7 +1,7 @@
 // Config
 
 const apiUrl = "https://judge0.p.rapidapi.com";
-const timeout = 200;
+const check_timeout = 200;
 const layoutConfig = {
   settings: {
     showPopoutIcon: false,
@@ -53,6 +53,24 @@ const layoutConfig = {
                     readOnly: true,
                   },
                 },
+                {
+                  type: "component",
+                  componentName: "compile output",
+                  title: "COMPILE OUTPUT",
+                  isClosable: false,
+                  componentState: {
+                    readOnly: true,
+                  },
+                },
+                {
+                  type: "component",
+                  componentName: "sandbox message",
+                  title: "SANDBOX MESSAGE",
+                  isClosable: false,
+                  componentState: {
+                    readOnly: true,
+                  },
+                },
               ],
             },
           ],
@@ -98,6 +116,7 @@ function handleRunError(jqXHR, textStatus, errorThrown) {
 }
 
 function handleResult(data) {
+  console.log(data);
   timeEnd = performance.now();
   console.log(
     "It took " + (timeEnd - timeStart) + " ms to get submission result."
@@ -105,36 +124,27 @@ function handleResult(data) {
 
   var status = data.status;
   var stdout = decode(data.stdout);
-  var stderr = decode(data.stderr);
   var compile_output = decode(data.compile_output);
   var sandbox_message = decode(data.message);
-  var time = data.time === null ? "-" : data.time + "s";
-  var memory = data.memory === null ? "-" : data.memory + "KB";
+  var timeS = data.time === null ? "-" : data.time + "s";
+  var timeMS = data.time === null ? "-" : data.time * 1000 + " ms";
+  var memoryKB = data.memory === null ? "-" : data.memory + " KB";
+  var memoryMB =
+    data.memory === null ? "-" : (data.memory / 1000).toFixed(3) + " MB";
 
-  $statusLine.html(`${status.description}, ${time}, ${memory}`);
+  console.log(sandbox_message);
+  sandbox_message += `${
+    sandbox_message === "" ? "" : "\n"
+  }Runtime: ${timeMS}\nMemory: ${memoryMB}`;
 
-  if (blinkStatusLine) {
-    $statusLine.addClass("blink");
-    setTimeout(function () {
-      blinkStatusLine = false;
-      localStorageSetItem("blink", "false");
-      $statusLine.removeClass("blink");
-    }, 3000);
-  }
+  $statusLine.html(`${status.description}, ${timeS}, ${memoryKB}`);
 
-  stdoutEditor.setValue(stdout);
-  stderrEditor.setValue(stderr);
-  compileOutputEditor.setValue(compile_output);
-  sandboxMessageEditor.setValue(sandbox_message);
+  window.stdoutEditor.setValue(stdout);
+  window.compileOutputEditor.setValue(compile_output);
+  window.sandboxMessageEditor.setValue(sandbox_message);
 
   if (stdout !== "") {
     var dot = document.getElementById("stdout-dot");
-    if (!dot.parentElement.classList.contains("lm_active")) {
-      dot.hidden = false;
-    }
-  }
-  if (stderr !== "") {
-    var dot = document.getElementById("stderr-dot");
     if (!dot.parentElement.classList.contains("lm_active")) {
       dot.hidden = false;
     }
@@ -158,12 +168,28 @@ function handleResult(data) {
 // Ajax
 
 $(window).resize(function () {
-  layout.updateSize();
+  window.layout.updateSize();
   // updateScreenElements();
   // showMessages();
 });
 
 async function init() {
+  $runBtn = $("#run-btn");
+  $runBtn.click(function (e) {
+    run();
+  });
+
+  $statusLine = $("#status-line");
+
+  $("body").keydown(function (e) {
+    var keyCode = e.keyCode || e.which;
+    if (keyCode == 120) {
+      // F9
+      e.preventDefault();
+      run();
+    }
+  });
+
   //// Get Firebase Database reference.
   var firepadRef = await getExampleRef();
 
@@ -178,9 +204,9 @@ async function init() {
     window.layout = new GoldenLayout(layoutConfig, $("#ide-content"));
 
     firepadRef.once("value").then(function (snapshot) {
-      langID = snapshot.val()["settings"]["languageID"];
+      window.langID = snapshot.val()["settings"]["languageID"];
       console.log(languages[langID]["mode"]);
-      layout.registerComponent("source", function (container, state) {
+      window.layout.registerComponent("source", function (container, state) {
         window.editor = monaco.editor.create(container.getElement()[0], {
           automaticLayout: true,
           language: languages[langID]["mode"],
@@ -188,13 +214,13 @@ async function init() {
           scrollBeyondLastLine: false,
           readOnly: state.readOnly,
         });
-        window.firepad = Firepad.fromMonaco(firepadRef, editor, {
+        window.firepad = Firepad.fromMonaco(firepadRef, window.editor, {
           defaultText: languages[langID]["source"],
           userId: userId,
         });
       });
 
-      layout.registerComponent("stdin", function (container, state) {
+      window.layout.registerComponent("stdin", function (container, state) {
         window.stdinEditor = monaco.editor.create(container.getElement()[0], {
           automaticLayout: true,
           theme: "vs-dark",
@@ -207,7 +233,7 @@ async function init() {
         });
       });
 
-      layout.registerComponent("stdout", function (container, state) {
+      window.layout.registerComponent("stdout", function (container, state) {
         window.stdoutEditor = monaco.editor.create(container.getElement()[0], {
           automaticLayout: true,
           theme: "vs-dark",
@@ -218,9 +244,74 @@ async function init() {
             enabled: false,
           },
         });
+
+        container.on("tab", function (tab) {
+          tab.element.append(
+            '<span id="stdout-dot" class="dot" hidden></span>'
+          );
+          tab.element.on("mousedown", function (e) {
+            e.target.closest(".lm_tab").children[3].hidden = true;
+          });
+        });
       });
 
-      layout.init();
+      window.layout.registerComponent("compile output", function (
+        container,
+        state
+      ) {
+        window.compileOutputEditor = monaco.editor.create(
+          container.getElement()[0],
+          {
+            automaticLayout: true,
+            theme: "vs-dark",
+            scrollBeyondLastLine: false,
+            readOnly: state.readOnly,
+            language: "plaintext",
+            minimap: {
+              enabled: false,
+            },
+          }
+        );
+
+        container.on("tab", function (tab) {
+          tab.element.append(
+            '<span id="compile-output-dot" class="dot" hidden></span>'
+          );
+          tab.element.on("mousedown", function (e) {
+            e.target.closest(".lm_tab").children[3].hidden = true;
+          });
+        });
+      });
+
+      window.layout.registerComponent("sandbox message", function (
+        container,
+        state
+      ) {
+        window.sandboxMessageEditor = monaco.editor.create(
+          container.getElement()[0],
+          {
+            automaticLayout: true,
+            theme: "vs-dark",
+            scrollBeyondLastLine: false,
+            readOnly: state.readOnly,
+            language: "plaintext",
+            minimap: {
+              enabled: false,
+            },
+          }
+        );
+
+        container.on("tab", function (tab) {
+          tab.element.append(
+            '<span id="sandbox-message-dot" class="dot" hidden></span>'
+          );
+          tab.element.on("mousedown", function (e) {
+            e.target.closest(".lm_tab").children[3].hidden = true;
+          });
+        });
+      });
+
+      window.layout.init();
     });
   });
   //// Create FirepadUserList (with our desired userId).
@@ -229,19 +320,93 @@ async function init() {
     document.getElementById("userlist"),
     userId
   );
-
-  //// Initialize contents.
-  //   firepad.on("ready", function () {
-  //     if (firepad.isHistoryEmpty()) {
-  //       firepad.setText("Check out the user list to the left!");
-  //     }
-  //   });
 }
 
 const getText = () => {
   console.log(window.firepad);
   console.log(window.firepad.getText());
 };
+
+function downloadSource(filename) {
+  filename = filename === undefined ? languages[langID]["filename"] : filename;
+  filename += languages[langID]["fileext"];
+  download(window.firepad.getText(), filename, "text/plain");
+}
+
+function run() {
+  if (window.firepad.getText().trim() === "") {
+    showError("Error", "Source code can't be empty!");
+    return;
+  } else {
+    $runBtn.addClass("loading");
+  }
+
+  document.getElementById("stdout-dot").hidden = true;
+  document.getElementById("compile-output-dot").hidden = true;
+  document.getElementById("sandbox-message-dot").hidden = true;
+
+  window.stdoutEditor.setValue("");
+  window.compileOutputEditor.setValue("");
+  window.sandboxMessageEditor.setValue("");
+
+  var sourceValue = encode(window.firepad.getText());
+  var stdinValue = encode(window.stdinEditor.getValue());
+
+  var data = {
+    source_code: sourceValue,
+    language_id: window.langID,
+    stdin: stdinValue,
+    redirect_stderr_to_stdout: true,
+  };
+
+  var sendRequest = function (data) {
+    timeStart = performance.now();
+    $.ajax({
+      url: apiUrl + `/submissions?base64_encoded=true&wait=false`,
+      type: "POST",
+      async: true,
+      crossdomain: true,
+      contentType: "application/json",
+      processData: false,
+      headers: {
+        "x-rapidapi-host": "judge0.p.rapidapi.com",
+        "x-rapidapi-key": "bb8f693609mshaf476b8c4e445a9p1482c1jsn8d28a3167617",
+        "content-type": "application/json",
+        accept: "application/json",
+      },
+      data: JSON.stringify(data),
+      success: function (data, textStatus, jqXHR) {
+        console.log(`Your submission token is: ${data.token}`);
+        setTimeout(fetchSubmission.bind(null, data.token), check_timeout);
+      },
+      error: handleRunError,
+    });
+  };
+
+  sendRequest(data);
+}
+
+function fetchSubmission(submission_token) {
+  $.ajax({
+    url: apiUrl + "/submissions/" + submission_token + "?base64_encoded=true",
+    type: "GET",
+    async: true,
+    crossDomain: true,
+    headers: {
+      "x-rapidapi-host": "judge0.p.rapidapi.com",
+      "x-rapidapi-key": "bb8f693609mshaf476b8c4e445a9p1482c1jsn8d28a3167617",
+    },
+    success: function (data, textStatus, jqXHR) {
+      if (data.status.id <= 2) {
+        // In Queue or Processing
+        setTimeout(fetchSubmission.bind(null, submission_token), check_timeout);
+        return;
+      }
+      handleResult(data);
+    },
+    error: handleRunError,
+  });
+}
 
 // Helper to get hash from end of URL or generate a random one.
 async function getExampleRef() {
@@ -281,8 +446,13 @@ const languages = {
   63: {
     source: javascriptSource,
     filename: "script",
-    fileext: "js",
+    fileext: ".js",
     mode: "javascript",
   },
-  71: { source: pythonSource, filename: "main", fileext: "py", mode: "python" },
+  71: {
+    source: pythonSource,
+    filename: "main",
+    fileext: ".py",
+    mode: "python",
+  },
 };
