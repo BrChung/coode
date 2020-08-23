@@ -1,0 +1,67 @@
+html {
+  height: 100%;
+}
+body {
+  margin: 0;
+  height: 100%;
+  position: relative;
+}
+/* Height / width / positioning can be customized for your use case.
+       For demo purposes, we make firepad fill the entire browser. */
+#userlist {
+  position: absolute;
+  left: 0;
+  top: 50;
+  bottom: 0;
+  height: auto;
+  width: 175px;
+}
+#ide-content {
+  position: absolute;
+  left: 175px;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  height: calc(100% - 19px);
+}
+.powered-by-firepad {
+  visibility: hidden;
+}
+#ide-footer,
+#status-line {
+  background-color: #0e6eb8;
+  bottom: 0;
+  font-family: "Droid Sans Mono", monospace, monospace, "Droid Sans Fallback";
+  font-size: 13px;
+  height: 19px;
+  padding-left: 16px;
+  padding-right: 16px;
+  position: fixed;
+}
+
+#ide-footer {
+  color: #41a5f1;
+  left: 0;
+  text-align: center;
+  width: 100%;
+}
+
+#ide-footer a {
+  color: #41a5f1;
+  font-weight: bold;
+}
+
+#ide-footer a:hover {
+  color: #a0d2f8;
+}
+
+#status-line {
+  color: #fff;
+  float: right;
+  right: 0;
+  text-align: right;
+  width: fit-content;
+}
+/* #site-content {
+    height: calc(100% - 45px - 19px);
+  } */
