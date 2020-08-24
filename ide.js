@@ -320,6 +320,8 @@ async function init() {
       var langugageTitle = document.createElement("H3");
       var languageLogo = document.createElement("IMG");
       langugageTitle.innerHTML = languages[langID]["title"];
+      console.log(langID);
+      console.log(languages[langID]["short"]);
       languageLogo.setAttribute(
         "src",
         `languages/${languages[langID]["short"]}.png`
