@@ -5,27 +5,35 @@ body {
   margin: 0;
   height: 100%;
   position: relative;
+  background-color: #1b1c1d;
 }
 /* Height / width / positioning can be customized for your use case.
        For demo purposes, we make firepad fill the entire browser. */
 #userlist {
   position: absolute;
   left: 0;
-  top: 50;
+  top: 54px;
   bottom: 0;
   height: auto;
   width: 175px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: #1b1c1d;
 }
 #ide-content {
   position: absolute;
   left: 175px;
-  top: 0;
+  top: 54px;
   bottom: 0;
   right: 0;
-  height: calc(100% - 19px);
+  background-color: #1b1c1d;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  height: calc(100% - 54px - 19px);
 }
 .powered-by-firepad {
   visibility: hidden;
+}
+.ui.menu {
+  border-radius: unset !important;
 }
 #ide-footer,
 #status-line {
@@ -63,6 +71,31 @@ body {
   width: fit-content;
 }
 
+#ide-language {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+#ide-language h3 {
+  display: inline;
+  vertical-align: middle;
+  font-family: "Exo 2", sans-serif;
+  margin: 0;
+  margin-left: 12px;
+}
+
+#ide-language-icon {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+}
+
+.ide-selection-language {
+  width: 2em;
+  height: 2em;
+  vertical-align: middle;
+}
+
 .dot {
   background: #0e6eb8;
   position: absolute;
@@ -71,6 +104,10 @@ body {
   height: 5px;
   right: 7.5px;
   top: 7.5px;
+}
+
+.fill-space {
+  flex: 1 1 auto;
 }
 
 .lm_header .lm_tab {

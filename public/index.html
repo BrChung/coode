@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Co-ode</title>
 
     <!-- The core Firebase JS SDK is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/7.19.0/firebase-app.js"></script>
@@ -88,10 +88,30 @@
 
   </head>
   <body onload="init()">
-    <button onclick="getText()">Get Text</button>
-    <button onclick="downloadSource()">Download source</button>
-    <div class="item no-left-padding borderless">
-        <button id="run-btn" class="ui primary labeled icon button"><i class="play icon"></i>Run (F9)</button>
+    <div id="site-navigation" class="ui small inverted menu">
+        <div id="site-header" class="header item">
+            <a href="/">
+                <!-- <img id="site-icon" src=""> -->
+                <h2>Co-ode</h2>
+            </a>
+        </div>
+        <div class="left menu">
+            <div class="ui dropdown item site-links on-hover">
+                File <i class="dropdown icon"></i>
+                <div class="menu">
+                    <a class="item" target="_blank" href="/"><i class="file code icon"></i> New File</a>
+                    <div class="item" onclick="downloadSource()"><i class="download icon"></i> Download Code</div>
+                    <!-- <div class="item"><i class="share icon"></i> Share</div> -->
+                </div>
+            </div>
+            <div id="ide-language" class="header item">
+            </div>
+        </div>
+        <div class="right menu">
+            <div class="item no-left-padding borderless">
+                <button id="run-btn" class="ui primary labeled icon button"><i class="play icon"></i>Run (F9)</button>
+            </div>
+        </div>
     </div>
     <div id="userlist"></div>
     <div id="ide-content"></div>
@@ -108,8 +128,41 @@
             </div>
         </div>
     </div>
+    <div id="new-ide" class="ui tiny modal">
+        <div class="header">
+            <i class="file code icon"></i>
+            New File
+        </div>
+        <div class="content">
+            <div class="ui form">
+                <div class="inline fields">
+                    <label>Language</label>
+                    <div class="ui fluid search selection dropdown">
+                        <input type="hidden" name="language" id="selected-language"/>
+                        <i class="dropdown icon"></i>
+                        <div class="default text">Select Programming Language</div>
+                        <div class="menu">
+                        <div class="item" data-value="45"><img class="ide-selection-language" src="languages/nasm.png"/>Assembly (NASM 2.14.02)</div>
+                        <div class="item" data-value="50"><img class="ide-selection-language" src="languages/c.png"/>C (GCC 9.2.0)</div>
+                        <div class="item" data-value="54"><img class="ide-selection-language" src="languages/cpp.png"/>C++ (GCC 9.2.0)</div>
+                        <div class="item" data-value="62"><img class="ide-selection-language" src="languages/java.png"/>Java (OpenJDK 13.0.1)</div>
+                        <div class="item" data-value="63"><img class="ide-selection-language" src="languages/javascript.png"/>JavaScript (Node.js 12.14.0)</div>
+                        <div class="item" data-value="70"><img class="ide-selection-language" src="languages/python.png"/>Python (2.7.17)</div>
+                        <div class="item" data-value="71"><img class="ide-selection-language" src="languages/python.png"/>Python (3.8.1)</div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="actions">
+                    <button class="ui primary button" onclick="createNewIDE()">
+                        Create File
+                    </button>    
+                </div>
+            </div>   
+        </div>    
+    </div>
     <div id="ide-footer">
-        <span>© 2020 <a href="https://judge0.com">Judge0</a> · Powered by <a href="https://rapidapi.com/hermanzdosilovic/api/judge0">the most advanced open-source online code execution system</a>
+        <span>© 2020 <a href="https://brianchung.co">Brian Chung</a>
         <span id="status-line"></span>
     </div>
   </body>

@@ -181,6 +181,10 @@ async function init() {
 
   $statusLine = $("#status-line");
 
+  $("select.dropdown").dropdown();
+  $(".ui.dropdown").dropdown();
+  $(".ui.dropdown.site-links").dropdown({ action: "hide", on: "hover" });
+
   $("body").keydown(function (e) {
     var keyCode = e.keyCode || e.which;
     if (keyCode == 120) {
@@ -312,6 +316,18 @@ async function init() {
       });
 
       window.layout.init();
+
+      var langugageTitle = document.createElement("H3");
+      var languageLogo = document.createElement("IMG");
+      langugageTitle.innerHTML = languages[langID]["title"];
+      languageLogo.setAttribute(
+        "src",
+        `languages/${languages[langID]["short"]}.png`
+      );
+      languageLogo.setAttribute("id", "ide-language-icon");
+      var languageContainer = document.getElementById("ide-language");
+      languageContainer.appendChild(languageLogo);
+      languageContainer.appendChild(langugageTitle);
     });
   });
   //// Create FirepadUserList (with our desired userId).
@@ -427,32 +443,135 @@ async function getExampleRef() {
       });
   } else {
     console.log("new page");
-    ref = firebase.database().ref("documents");
-    ref = ref.push(); // generate unique location.
-    var langIDTEMP = 63;
-    ref.set({ settings: { languageID: langIDTEMP } });
-    window.location = window.location + "#" + ref.key; // add it as a hash to the URL.
+    $("#new-ide").modal("setting", "closable", false).modal("show");
   }
   console.log(ref);
   return ref;
 }
 
+function createNewIDE() {
+  var langID = document.getElementById("selected-language").value;
+  $("#new-ide").modal("hide");
+  ref = firebase.database().ref("documents");
+  ref = ref.push(); // generate unique location.
+  ref.set({ settings: { languageID: langID } });
+  window.location = window.location + "#" + ref.key; // add it as a hash to the URL.
+  init();
+}
+
 // Template Source Code - Hello World
+const assemblySource =
+  "\
+section	.text\n\
+    global _start\n\
+\n\
+_start:\n\
+\n\
+    xor	eax, eax\n\
+    lea	edx, [rax+len]\n\
+    mov	al, 1\n\
+    mov	esi, msg\n\
+    mov	edi, eax\n\
+    syscall\n\
+\n\
+    xor	edi, edi\n\
+    lea	eax, [rdi+60]\n\
+    syscall\n\
+\n\
+section	.rodata\n\
+\n\
+msg	db 'hello, world', 0xa\n\
+len	equ	$ - msg\n\
+";
+
+const cSource =
+  '\
+#include <stdio.h>\n\
+\n\
+int main(void) {\n\
+    printf("hello, world\\n");\n\
+    return 0;\n\
+}\n\
+';
+
+const cppSource =
+  '\
+#include <iostream>\n\
+\n\
+int main() {\n\
+    std::cout << "hello, world" << std::endl;\n\
+    return 0;\n\
+}\n\
+';
+
+const javaSource =
+  '\
+public class Main {\n\
+    public static void main(String[] args) {\n\
+        System.out.println("hello, world");\n\
+    }\n\
+}\n\
+';
+
 const javascriptSource = 'console.log("hello, world");';
 
 const pythonSource = 'print("hello, world")';
 
 const languages = {
+  45: {
+    source: assemblySource,
+    filename: "main",
+    fileext: ".asm",
+    mode: "UNKNOWN",
+    title: "Assembly (NASM 2.14.02)",
+    short: "nasm",
+  },
+  50: {
+    source: cSource,
+    filename: "main",
+    fileext: ".c",
+    mode: "c",
+    title: "C (GCC 9.2.0)",
+    short: "c",
+  },
+  54: {
+    source: cppSource,
+    filename: "main",
+    fileext: ".cpp",
+    mode: "cpp",
+    title: "C++ (GCC 9.2.0)",
+    short: "cpp",
+  },
+  62: {
+    source: javaSource,
+    filename: "Main",
+    fileext: ".java",
+    mode: "java",
+    title: "Java (OpenJDK 13.0.1)",
+    short: "java",
+  },
   63: {
     source: javascriptSource,
     filename: "script",
     fileext: ".js",
     mode: "javascript",
+    title: "JavaScript (Node.js 12.14.0)",
+    short: "javascript",
+  },
+  70: {
+    source: pythonSource,
+    filename: "main",
+    fileext: ".py",
+    mode: "python",
+    title: "Python (2.7.17)",
+    short: "python",
   },
   71: {
     source: pythonSource,
     filename: "main",
     fileext: ".py",
+    mode: "python",
+    title: "Python (3.8.1)",
     mode: "python",
   },
 };
