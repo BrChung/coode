@@ -116,12 +116,6 @@ function handleRunError(jqXHR, textStatus, errorThrown) {
 }
 
 function handleResult(data) {
-  console.log(data);
-  timeEnd = performance.now();
-  console.log(
-    "It took " + (timeEnd - timeStart) + " ms to get submission result."
-  );
-
   var status = data.status;
   var stdout = decode(data.stdout);
   var compile_output = decode(data.compile_output);
@@ -131,8 +125,6 @@ function handleResult(data) {
   var memoryKB = data.memory === null ? "-" : data.memory + " KB";
   var memoryMB =
     data.memory === null ? "-" : (data.memory / 1000).toFixed(3) + " MB";
-
-  console.log(sandbox_message);
   sandbox_message += `${
     sandbox_message === "" ? "" : "\n"
   }Runtime: ${timeMS}\nMemory: ${memoryMB}`;
@@ -198,7 +190,7 @@ async function init() {
   var firepadRef = await getExampleRef();
 
   if (firepadRef === null) {
-    return console.log("error ref is null");
+    return;
   }
 
   // Create a random ID to use as our user ID (we must give this to firepad and FirepadUserList).
@@ -209,7 +201,6 @@ async function init() {
 
     firepadRef.once("value").then(function (snapshot) {
       window.langID = snapshot.val()["settings"]["languageID"];
-      console.log(languages[langID]["mode"]);
       window.layout.registerComponent("source", function (container, state) {
         window.editor = monaco.editor.create(container.getElement()[0], {
           automaticLayout: true,
@@ -320,8 +311,6 @@ async function init() {
       var langugageTitle = document.createElement("H3");
       var languageLogo = document.createElement("IMG");
       langugageTitle.innerHTML = languages[langID]["title"];
-      console.log(langID);
-      console.log(languages[langID]["short"]);
       languageLogo.setAttribute(
         "src",
         `languages/${languages[langID]["short"]}.png`
@@ -339,11 +328,6 @@ async function init() {
     userId
   );
 }
-
-const getText = () => {
-  console.log(window.firepad);
-  console.log(window.firepad.getText());
-};
 
 function downloadSource(filename) {
   filename = filename === undefined ? languages[langID]["filename"] : filename;
@@ -378,7 +362,6 @@ function run() {
   };
 
   var sendRequest = function (data) {
-    timeStart = performance.now();
     $.ajax({
       url: apiUrl + `/submissions?base64_encoded=true&wait=false`,
       type: "POST",
@@ -394,7 +377,6 @@ function run() {
       },
       data: JSON.stringify(data),
       success: function (data, textStatus, jqXHR) {
-        console.log(`Your submission token is: ${data.token}`);
         setTimeout(fetchSubmission.bind(null, data.token), check_timeout);
       },
       error: handleRunError,
@@ -428,7 +410,6 @@ function fetchSubmission(submission_token) {
 
 // Helper to get hash from end of URL or generate a random one.
 async function getExampleRef() {
-  console.log("i ran");
   var ref = null;
   var hash = window.location.hash.replace(/#/g, "");
   if (hash) {
@@ -440,14 +421,13 @@ async function getExampleRef() {
         if (snapshot.exists()) {
           ref = firebase.database().ref("documents").child(hash);
         } else {
-          console.log("no hash found");
+          console.log("page/hash not found - redirecting to home");
+          location.replace("/");
         }
       });
   } else {
-    console.log("new page");
     $("#new-ide").modal("setting", "closable", false).modal("show");
   }
-  console.log(ref);
   return ref;
 }
 
@@ -574,6 +554,6 @@ const languages = {
     fileext: ".py",
     mode: "python",
     title: "Python (3.8.1)",
-    mode: "python",
+    short: "python",
   },
 };
