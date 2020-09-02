@@ -187,6 +187,7 @@ $(window).resize(function () {
 });
 
 async function init() {
+  console.log(CodeMirror.modes);
   $runBtn = $("#run-btn");
   $runBtn.click(function (e) {
     run();
@@ -223,14 +224,13 @@ async function init() {
     firepadRef.once("value").then(function (snapshot) {
       window.exID = snapshot.val()["settings"]["exampleID"];
       window.layout.registerComponent("source", function (container, state) {
-        window.editor = monaco.editor.create(container.getElement()[0], {
-          automaticLayout: true,
-          language: examples[exID]["mode"],
-          theme: "vs-dark",
-          scrollBeyondLastLine: false,
+        window.editor = CodeMirror(container.getElement()[0], {
+          lineNumbers: true,
+          mode: "nasm",
+          theme: "material-darker",
           readOnly: state.readOnly,
         });
-        window.firepad = Firepad.fromMonaco(firepadRef, window.editor, {
+        window.firepad = Firepad.fromCodeMirror(firepadRef, window.editor, {
           defaultText: examples[exID]["source"],
           userId: userId,
         });
