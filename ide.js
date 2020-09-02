@@ -202,14 +202,13 @@ async function init() {
     firepadRef.once("value").then(function (snapshot) {
       window.langID = snapshot.val()["settings"]["languageID"];
       window.layout.registerComponent("source", function (container, state) {
-        window.editor = monaco.editor.create(container.getElement()[0], {
-          automaticLayout: true,
-          language: languages[langID]["mode"],
-          theme: "vs-dark",
-          scrollBeyondLastLine: false,
+        window.editor = CodeMirror(container.getElement()[0], {
+          lineNumbers: true,
+          mode: languages[langID]["mode"],
+          theme: "material-darker",
           readOnly: state.readOnly,
         });
-        window.firepad = Firepad.fromMonaco(firepadRef, window.editor, {
+        window.firepad = Firepad.fromCodeMirror(firepadRef, window.editor, {
           defaultText: languages[langID]["source"],
           userId: userId,
         });
@@ -504,7 +503,7 @@ const languages = {
     source: assemblySource,
     filename: "main",
     fileext: ".asm",
-    mode: "UNKNOWN",
+    mode: "nasm",
     title: "Assembly (NASM 2.14.02)",
     short: "nasm",
   },
@@ -512,7 +511,7 @@ const languages = {
     source: cSource,
     filename: "main",
     fileext: ".c",
-    mode: "c",
+    mode: "clike",
     title: "C (GCC 9.2.0)",
     short: "c",
   },
@@ -520,7 +519,7 @@ const languages = {
     source: cppSource,
     filename: "main",
     fileext: ".cpp",
-    mode: "cpp",
+    mode: "clike",
     title: "C++ (GCC 9.2.0)",
     short: "cpp",
   },
@@ -528,7 +527,7 @@ const languages = {
     source: javaSource,
     filename: "Main",
     fileext: ".java",
-    mode: "java",
+    mode: "clike",
     title: "Java (OpenJDK 13.0.1)",
     short: "java",
   },

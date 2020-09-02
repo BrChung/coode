@@ -187,7 +187,6 @@ $(window).resize(function () {
 });
 
 async function init() {
-  console.log(CodeMirror.modes);
   $runBtn = $("#run-btn");
   $runBtn.click(function (e) {
     run();
