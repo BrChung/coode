@@ -205,7 +205,7 @@ async function init() {
         window.editor = CodeMirror(container.getElement()[0], {
           lineNumbers: true,
           mode: languages[langID]["mode"],
-          theme: "monokai",
+          theme: "material-darker",
           readOnly: state.readOnly,
         });
         window.firepad = Firepad.fromCodeMirror(firepadRef, window.editor, {
