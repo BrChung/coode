@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Co-ode</title>
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.19.0/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+    <script src="https://www.gstatic.com/firebasejs/7.19.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.19.0/firebase-analytics.js"></script>
+
+    <script src="javascript/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
+
+    <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyDSBbh66pXbsN66BX8-bxyA5KifVGkvYKk",
+        authDomain: "coode-dev.firebaseapp.com",
+        databaseURL: "https://coode-dev.firebaseio.com",
+        projectId: "coode-dev",
+        storageBucket: "coode-dev.appspot.com",
+        messagingSenderId: "903120387716",
+        appId: "1:903120387716:web:b769cd062509e8be31ccd1",
+        measurementId: "G-Z5M50SDN5V",
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      firebase.analytics();
+    </script>
+
+    <!-- JQuery -->
+    <script
+      type="text/javascript"
+      src="https://code.jquery.com/jquery-1.11.1.min.js"
+    ></script>
+
+    <!-- GoldenLayout -->
+    <script
+      type="text/javascript"
+      src="https://golden-layout.com/files/latest/js/goldenlayout.min.js"
+    ></script>
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="https://golden-layout.com/files/latest/css/goldenlayout-base.css"
+    />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="https://golden-layout.com/files/latest/css/goldenlayout-dark-theme.css"
+    />
+
+    <!-- Firepad -->
+    <link
+      rel="stylesheet"
+      href="https://firepad.io/releases/v1.5.10/firepad.css"
+    />
+    <script src="https://firepad.io/releases/v1.5.10/firepad.min.js"></script>
+
+    <!-- Monaco Editor -->
+    <script>
+      var require = {
+        paths: {
+          vs: "https://unpkg.com/monaco-editor/min/vs",
+          "monaco-vim": "https://unpkg.com/monaco-vim/dist/monaco-vim",
+          "monaco-emacs": "https://unpkg.com/monaco-emacs/dist/monaco-emacs",
+        },
+      };
+    </script>
+    <script src="https://unpkg.com/monaco-editor/min/vs/loader.js"></script>
+    <script src="https://unpkg.com/monaco-editor@0.18.1/min/vs/editor/editor.main.nls.js"></script>
+    <script src="https://unpkg.com/monaco-editor@0.18.1/min/vs/editor/editor.main.js"></script>
+
+    <script src="firepad-userlist.js"></script>
+    <link rel="stylesheet" href="firepad-userlist.css" />
+
+    <script type="text/javascript" src="download.js"></script>
+    <script src="javascript/cpsc240.js"></script>
+    <link rel="stylesheet" href="ide.css" />
+
+    <script src="semantic.min.js"></script>
+    <link rel="stylesheet" href="semantic.min.css" />
+
+
+  </head>
+  <body onload="init()">
+    <div id="site-navigation" class="ui small inverted menu">
+        <div id="site-header" class="header item">
+            <a href="/">
+                <!-- <img id="site-icon" src=""> -->
+                <h2>Co-ode</h2>
+            </a>
+        </div>
+        <div class="left menu">
+            <div class="ui dropdown item site-links on-hover">
+                File <i class="dropdown icon"></i>
+                <div class="menu">
+                    <a class="item" target="_blank" href="/"><i class="file code icon"></i> New File</a>
+                    <div class="item" onclick="downloadSource()"><i class="download icon"></i> Download Code</div>
+                    <!-- <div class="item"><i class="share icon"></i> Share</div> -->
+                </div>
+            </div>
+            <div id="ide-language" class="header item">
+            </div>
+        </div>
+        <div class="right menu">
+            <div class="item no-left-padding borderless">
+                <button id="run-btn" class="ui primary labeled icon button"><i class="play icon"></i>Run (F9)</button>
+            </div>
+        </div>
+    </div>
+    <div id="userlist"></div>
+    <div id="ide-content"></div>
+    <div id="site-modal" class="ui modal">
+        <div class="header">
+            <i class="close icon"></i>
+            <span id="title"></span>
+        </div>
+        <div class="scrolling content"></div>
+        <div class="actions">
+            <div class="ui small labeled icon cancel button">
+                <i class="remove icon"></i>
+                Close (ESC)
+            </div>
+        </div>
+    </div>
+    <div id="new-ide" class="ui tiny modal">
+        <div class="header">
+            <i class="file code icon"></i>
+            New File
+        </div>
+        <div class="content">
+            <div class="ui form">
+                <div class="inline fields">
+                    <label>Example</label>
+                    <div class="ui fluid search selection dropdown">
+                        <input type="hidden" name="example" id="selected-example"/>
+                        <i class="dropdown icon"></i>
+                        <div class="default text">Select Example Program</div>
+                        <div class="menu">
+                        <div class="item" data-value="1"><img class="ide-selection-language" src="languages/nasm.png"/>printf() - Strings and Integers</div>
+                        <div class="item" data-value="2"><img class="ide-selection-language" src="languages/nasm.png"/>Professor Holliday - Arithmetic</div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="actions">
+                    <button class="ui primary button" onclick="createNewIDE()">
+                        Create File
+                    </button>    
+                </div>
+            </div>   
+        </div>    
+    </div>
+    <div id="ide-footer">
+        <span>© 2020 <a href="https://brianchung.co">Brian Chung</a>
+        <span id="status-line"></span>
+    </div>
+  </body>
+</html>
