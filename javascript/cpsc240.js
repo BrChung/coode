@@ -110,7 +110,7 @@ function decode(bytes) {
   var escaped = escape(atob(bytes || ""));
   try {
     return decodeURIComponent(escaped);
-  } catch {
+  } catch (error) {
     return unescape(escaped);
   }
 }
