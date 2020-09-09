@@ -653,6 +653,9 @@ pop rbp                                                     ;Restore rbp\n\n\
 mov qword rax, 0                                  ;Return value 0 indicates successful conclusion.\n\
 ret                                               ;Pop the integer stack and jump to the address represented by the popped value.\n';
 
+const goldenRatio =
+  '; Program to calcuate the length of the next golden ratio side 1:1.618\n; We will approximate 1.1618 as 55/34\n; Example func(34) => 21, func(21) = 13\n\nsection .data\n    welcome db "This Golden Ratio function is brought to you by Brian!", 10, 0\n    inputPrompt db "Please enter the length of the current side: ", 0\n    returnString db "The integer part of the length will be returned to the main program. Please enjoy your fancy UI.", 10, 0\n    recievedNumberFormat db "The number %ld was received.", 10, 0\n    resultFormat1 db "The length of the next side based on the Golden Ratio is %ld ", 0\n    resultFormat2 db "and %ld/55 meters.", 10, 0\n    stringFormat db "%s", 0\n    intPrintFormat db "%d", 10, 0\n    longIntFormat db "%ld", 0\n\n; used declaring variables. uninitialized static data, both variables and constants\n; bss is a static memory section that contains buffers for data to be declared at runtime\nsection .bss\n    var1: resq 1\n\n\nsection .text\n    extern printf\n    extern scanf\n    global start\n\nstart:\n\n    ; setup and align the stack\n    push rbp\n\n    ; print a welcome message\n    mov rdi, stringFormat\n    mov rsi, welcome\n    mov rax, 0\n    call printf\n\n    ; print a input prompt \n    mov rdi, stringFormat\n    mov rsi, inputPrompt\n    xor rax, rax\n    call printf\n    \n    ; get input via scanf\n    mov rdi, longIntFormat\n    mov rsi, var1\n    mov rax, 0\n    call scanf\n    \n    ; print number for the sake of STDOUT (This block will be removed in submission)\n    mov rdi, intPrintFormat\n    mov rsi, [var1]\n    mov rax, 0\n    call printf\n    \n    ; print recieved number\n    mov rdi, recievedNumberFormat\n    mov rsi, [var1] ; move the actual value instead of a pointer\n    mov rax, 0\n    call printf\n    \n    ; multiply 34 to input\n    mov rax, [var1]\n    mov rcx, 34\n    mul rcx\n    mov r12, rax\n    \n    ; divide multiple by 55\n    mov rdx, 0\n    mov rax, r12 ; Dividend\n    mov rcx, 55  ; Divisor => Quotient in RAX, Remainder in RDX\n    idiv rcx\n    mov r12, rax\n    mov r13, rdx\n\n    ; print first half of result\n    mov rdi, resultFormat1\n    mov rsi, r12\n    mov rax, 0\n    call printf\n    \n    ; print second half of result\n    mov rdi, resultFormat2\n    mov rsi, r13\n    mov rax, 0\n    call printf\n    \n    ; print return string\n    mov rdi, returnString\n    mov rsi, stringFormat\n    mov rax, 0\n    call printf\n    \n    ; restore stack\n    pop rbp\n    \n    ; exit program with result as exit code\n    mov rax, r12\n    ret';
+
 const examples = {
   1: {
     source: printf_example,
@@ -670,6 +673,16 @@ const examples = {
     fileext: ".asm",
     mode: "UNKNOWN",
     title: "Professor Holliday - Arithmetic (NASM)",
+    short: "nasm",
+    compile: arithmeticCompile,
+    driver: arithmeticDriver,
+  },
+  3: {
+    source: goldenRatio,
+    filename: "main",
+    fileext: ".asm",
+    mode: "UNKNOWN",
+    title: "SI Example - Golden Ratio (NASM)",
     short: "nasm",
     compile: arithmeticCompile,
     driver: arithmeticDriver,
