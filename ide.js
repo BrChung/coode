@@ -498,6 +498,19 @@ const javascriptSource = 'console.log("hello, world");';
 
 const pythonSource = 'print("hello, world")';
 
+const kotlinSource = '\
+fun main() {\n\
+    println("hello, world")\n\
+}\n\
+';
+
+const swiftSource =
+  '\
+import Foundation\n\
+let name = readLine()\n\
+print("hello, \\(name!)")\n\
+';
+
 const languages = {
   45: {
     source: assemblySource,
@@ -554,5 +567,21 @@ const languages = {
     mode: "python",
     title: "Python (3.8.1)",
     short: "python",
+  },
+  78: {
+    source: kotlinSource,
+    filename: "Main",
+    fileext: ".kt",
+    mode: "clike",
+    title: "Kotlin (1.3.70)",
+    short: "kotlin",
+  },
+  83: {
+    source: swiftSource,
+    filename: "Main",
+    fileext: ".playground",
+    mode: "swift",
+    title: "Swift (5.2.3)",
+    short: "swift",
   },
 };
