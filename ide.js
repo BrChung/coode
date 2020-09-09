@@ -504,11 +504,10 @@ fun main() {\n\
 }\n\
 ';
 
-const swiftSource =
-  '\
+const swiftSource = '\
 import Foundation\n\
-let name = readLine()\n\
-print("hello, \\(name!)")\n\
+\n\
+print("hello world!")\n\
 ';
 
 const languages = {
@@ -579,7 +578,7 @@ const languages = {
   83: {
     source: swiftSource,
     filename: "Main",
-    fileext: ".playground",
+    fileext: ".swift",
     mode: "swift",
     title: "Swift (5.2.3)",
     short: "swift",
